@@ -1,0 +1,43 @@
+{
+  "name": "bustime-proxy",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/mbusdev/bustime-proxy#readme",
+  "bugs": {
+    "url": "https://github.com/mbusdev/bustime-proxy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbusdev/bustime-proxy.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "tsx --env-file=.env src/main.ts | pino-pretty",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@hyperdx/node-opentelemetry": "^0.11.0",
+    "@opentelemetry/api": "^1.9.1",
+    "@types/express": "^5.0.6",
+    "axios": "^1.20.0",
+    "dotenv": "^18.0.6",
+    "express": "^5.3.0",
+    "immutable": "^5.1.9",
+    "pino": "^10.4.0",
+    "tsx": "^4.23.15",
+    "vitest": "^5.0.3",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.2.0",
+    "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true,
+    "protobufjs@7.6.6": true
+  }
+}
