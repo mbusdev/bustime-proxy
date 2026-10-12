@@ -8,7 +8,7 @@ export class Cache<T, B> {
     profile: CacheProfile<T, B>
     inner: Map<
         RecordOf<{ path: string, queryNonListLike: Map<string, string>, queryListLike: Map<string, string> }>,
-        [number, T]
+        [number, T | null]
     >
 
     constructor(profile: CacheProfile<T, B>) {
@@ -37,12 +37,8 @@ export class Cache<T, B> {
             queryListLikeCombos.forEach((queryListLike) => {
                 const value = this.profile.extractCacheValue(queryListLike, response);
                 const key = CacheKey({ path, queryNonListLike: queryNonListLike.toMap(), queryListLike });
-                if (value != null) {
-                    logger.debug(`set cache ${key}: ${value}`);
-                    inner = inner.set(key, [ts, value]);
-                } else {
-                    logger.debug(`not setting cache ${key}`);
-                }
+                logger.debug(`set cache ${key}: ${value}`);
+                inner = inner.set(key, [ts, value]);
             });
         });
     }
@@ -78,11 +74,19 @@ export class Cache<T, B> {
                 return val;
             }
         );
-        const populatedCacheResults = cacheResults.filter((x) => x != undefined);
-        if (cacheResults.size === 0 || populatedCacheResults.size < cacheResults.size) return null;
-        const earliestTs = populatedCacheResults.toSeq().map((x) => x[0]).reduce((acc, x) => Math.min(acc, x));
+        let notUndefCacheResults = cacheResults.filter((x) => x != undefined);
+        // if an undefined is present, the cache is incomplete
+        if (cacheResults.size === 0 || notUndefCacheResults.size < cacheResults.size) return null;
+        const earliestTs = notUndefCacheResults.toSeq()
+            .map((x) => x[0])
+            .reduce((acc, x) => Math.min(acc, x));
+        const populatedCacheValues = notUndefCacheResults.toSeq()
+            .map((x) => x[1])
+            .filter((x) => x != null);
+        // if all nulls, we can't make a result
+        if (populatedCacheValues.size === 0) return null;
 
-        return [earliestTs, populatedCacheResults.toSeq().map((x) => x[1]).reduce(this.profile.mergeCacheValues)];
+        return [earliestTs, populatedCacheValues.reduce(this.profile.mergeCacheValues)];
     }
 }
 
