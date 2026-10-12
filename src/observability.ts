@@ -11,14 +11,17 @@ HyperDX.init({
 });
 
 export const logger = pino({
+    level: 'info',
     mixin: HyperDX.getPinoMixinFunction,
     transport: {
         targets: [
             HyperDX.getPinoTransport('info'),
-            { target: 'pino/file', options: { destination: 1 } },
+            { target: 'pino/file', level: 'debug', options: { destination: 1 } },
         ],
     },
 });
+logger.info('info');
+logger.debug('debug');
 
 export const tracer = opentelemetry.trace.getTracer('bustime-proxy', '0.1.0');
 export const meter = opentelemetry.metrics.getMeter('bustime-proxy', '0.1.0');
