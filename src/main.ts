@@ -80,17 +80,25 @@ app.get('/*ask', async (req, res) => {
             remainingAdditionalRequests -= 1;
         }
 
-        // FIXME: replace api key properly
-        // TODO: support keyless upstream services
-        const url = urlJoin(config.PROXY_URL, req.originalUrl).replace(providedKey, config.PROXY_UPSTREAM_KEY);
-        // const url = new URL(`${config.PROXY_URL}/${req.originalUrl.replace(providedKey, config.PROXY_UPSTREAM_KEY)}`);
-        logger.debug(`requesting ${url}`);
-        const response = await fetch(url);
-        const responseBody = await cacheProfile.getResponseBody(response);
-        const responseBodyParsed = cacheProfile.parseResponseBody(responseBody);
-        // res.setHeaders(response.headers);
-        res.type(cacheProfile.mime);
-        res.status(response.status).send(responseBody);
+        const responseBodyParsed = await tracer.startActiveSpan('upstream_request', async (span) => {
+            try {
+                // FIXME: replace api key properly
+                // TODO: support keyless upstream services
+                const url = urlJoin(config.PROXY_URL, req.originalUrl)
+                    .replace(providedKey, config.PROXY_UPSTREAM_KEY);
+                logger.debug(`requesting ${url}`);
+
+                const response = await fetch(url);
+                const responseBody = await cacheProfile.getResponseBody(response);
+                res.type(cacheProfile.mime);
+                res.status(response.status).send(responseBody);
+
+                const responseBodyParsed = cacheProfile.parseResponseBody(responseBody);
+                return responseBodyParsed;
+            } finally {
+                span.end();
+            }
+        });
         // update the cache
         cache.updateWith(new Date().getTime(), path, queryNoApiKey, responseBodyParsed);
     } else if (bypassNeeded) {

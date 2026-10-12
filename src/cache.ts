@@ -71,7 +71,11 @@ export class Cache<T, B> {
                     path, queryNonListLike: queryNonListLike.toMap(), queryListLike
                 });
                 logger.debug(`get cache ${key}`);
-                return this.inner.get(key);
+                const val = this.inner.get(key);
+                if (val == undefined) {
+                    logger.debug(`cache miss due to key ${key}`);
+                }
+                return val;
             }
         );
         const populatedCacheResults = cacheResults.filter((x) => x != undefined);

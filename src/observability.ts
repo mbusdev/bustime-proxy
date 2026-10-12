@@ -11,11 +11,11 @@ HyperDX.init({
 });
 
 export const logger = pino({
-    level: 'info',
+    level: 'debug',
     mixin: HyperDX.getPinoMixinFunction,
     transport: {
         targets: [
-            HyperDX.getPinoTransport('info'),
+            HyperDX.getPinoTransport('debug'),
             { target: 'pino/file', level: 'debug', options: { destination: 1 } },
         ],
     },
