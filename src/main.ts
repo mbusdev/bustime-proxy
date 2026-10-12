@@ -88,7 +88,8 @@ app.get('/*ask', async (req, res) => {
         const response = await fetch(url);
         const responseBody = await cacheProfile.getResponseBody(response);
         const responseBodyParsed = cacheProfile.parseResponseBody(responseBody);
-        res.setHeaders(response.headers);
+        // res.setHeaders(response.headers);
+        res.type(cacheProfile.mime);
         res.status(response.status).send(responseBody);
         // update the cache
         cache.updateWith(new Date().getTime(), path, queryNoApiKey, responseBodyParsed);
